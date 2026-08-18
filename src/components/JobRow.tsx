@@ -1,13 +1,4 @@
 import React from 'react';
-import { 
-  MapPin, 
-  DollarSign, 
-  Clock, 
-  Layers, 
-  AlertTriangle, 
-  Bookmark, 
-  Send 
-} from 'lucide-react';
 import { Job, AIVerdict } from '../types/job';
 
 interface JobRowProps {
@@ -16,19 +7,18 @@ interface JobRowProps {
   onSelect: () => void;
 }
 
-function getVerdictLabel(verdict: AIVerdict): string {
+function getVerdictClass(verdict: AIVerdict): string {
   switch (verdict) {
-    case 'apply': return 'Apply';
-    case 'strong_match': return 'Strong';
-    case 'review': return 'Review';
-    case 'low_priority': return 'Low';
-    case 'skip': return 'Skip';
-    default: return verdict;
+    case 'apply':
+    case 'strong_match': return 'score-strong';
+    case 'review': return 'score-review';
+    case 'skip': return 'score-skip';
+    default: return 'score-low';
   }
 }
 
 export const JobRow: React.FC<JobRowProps> = ({ job, isSelected, onSelect }) => {
-  const { ai_evaluation, salary, location, application_requirements, duplicate_group, hard_filter } = job;
+  const { ai_evaluation, salary, location, application_requirements, hard_filter } = job;
   
   return (
     <div 
@@ -40,86 +30,33 @@ export const JobRow: React.FC<JobRowProps> = ({ job, isSelected, onSelect }) => 
         if (e.key === 'Enter') onSelect();
       }}
     >
-      <div className="job-row-top">
-        <div className="job-row-title-group">
-          <div className="job-row-title" title={job.title}>{job.title}</div>
-          <div className="job-row-company">
-            <span>{job.company_name}</span>
-            {job.company_industry && (
-              <>
-                <span style={{ color: 'var(--text-dim)' }}>·</span>
-                <span style={{ color: 'var(--text-muted)' }}>{job.company_industry}</span>
-              </>
-            )}
-          </div>
+      <div className="row-line-1">
+        <div className={`row-score ${getVerdictClass(ai_evaluation.verdict)}`}>
+          {ai_evaluation.score}
         </div>
-
-        <div className={`score-badge verdict-${ai_evaluation.verdict}`}>
-          <span>{ai_evaluation.score}</span>
-          <span style={{ fontSize: '10px', opacity: 0.85 }}>{getVerdictLabel(ai_evaluation.verdict)}</span>
+        <div className="row-company">{job.company_name}</div>
+        <div className="row-title" title={job.title}>{job.title}</div>
+        
+        <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
+          {hard_filter.status === 'fail' && (
+            <span className="ui-chip danger">Incompatible</span>
+          )}
+          {job.status === 'applied' && (
+            <span className="ui-chip info">Applied</span>
+          )}
+          {job.status === 'saved' && (
+            <span className="ui-chip positive">Saved</span>
+          )}
         </div>
       </div>
 
-      <div className="job-row-tags">
-        {/* Location Tag */}
-        <span className="job-tag">
-          <MapPin size={11} />
-          <span>{location.raw}</span>
+      <div className="row-line-2">
+        <span className="ui-chip purple">{salary.raw}</span>
+        <span className="ui-chip neutral">{location.raw}</span>
+        <span className="ui-chip neutral">{job.employment_type.replace('_', ' ')} · {job.seniority}</span>
+        <span className={`ui-chip ${application_requirements.estimated_effort === 'low' ? 'positive' : application_requirements.estimated_effort === 'high' ? 'warning' : 'neutral'}`}>
+          Effort: {application_requirements.estimated_effort}
         </span>
-
-        {/* Salary Tag */}
-        <span className="job-tag salary">
-          <DollarSign size={11} />
-          <span>{salary.raw}</span>
-        </span>
-
-        {/* Experience */}
-        <span className="job-tag">
-          <span>{job.experience_required}</span>
-        </span>
-
-        {/* Effort */}
-        <span className={`job-tag effort-${application_requirements.estimated_effort}`}>
-          <Clock size={11} />
-          <span>Effort: {application_requirements.estimated_effort}</span>
-        </span>
-
-        {/* Multi-Source Duplicate Badge */}
-        {duplicate_group && duplicate_group.duplicate_count > 1 && (
-          <span className="job-tag duplicate-badge" title={`Found across: ${duplicate_group.source_names.join(', ')}`}>
-            <Layers size={11} />
-            <span>{duplicate_group.duplicate_count} sources</span>
-          </span>
-        )}
-
-        {/* Hard filter warning badge */}
-        {hard_filter.status === 'fail' && (
-          <span className="job-tag hard-fail">
-            <AlertTriangle size={11} />
-            <span>Incompatible</span>
-          </span>
-        )}
-
-        {/* Human review state */}
-        {job.status === 'applied' && (
-          <span className="job-tag status-badge applied">
-            <Send size={10} />
-            <span>Applied</span>
-          </span>
-        )}
-
-        {job.status === 'saved' && (
-          <span className="job-tag status-badge saved">
-            <Bookmark size={10} />
-            <span>Saved</span>
-          </span>
-        )}
-
-        {job.status === 'skipped' && (
-          <span className="job-tag status-badge skipped">
-            <span>Skipped</span>
-          </span>
-        )}
       </div>
     </div>
   );

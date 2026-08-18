@@ -385,7 +385,7 @@ Evaluate:
 - Scope quality
 - Application effort
 - Company quality
-- Potential risks
+- Potential warnings or missing information
 
 ### Layer 3 — Robert Review
 
@@ -405,11 +405,11 @@ Initial scoring dimensions:
 - Scope quality
 - Application effort
 - Company quality
-- Risk level
+- Missing information or evidence constraints
 
-Weights should remain configurable during MVP development.
+Weights must strictly follow the canonical 100-point model.
 
-Do not hard-code a final weighting system until tested against representative real job postings.
+The 100-point canonical weighting system is final.
 
 ## 21. AI Output
 

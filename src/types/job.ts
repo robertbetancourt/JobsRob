@@ -1,138 +1,123 @@
-﻿export type WorkArrangement = 'remote' | 'hybrid' | 'onsite' | 'unknown';
-export type EmploymentType = 'full_time' | 'part_time' | 'contract' | 'temporary' | 'freelance' | 'unknown';
-export type SeniorityLevel = 'junior' | 'mid' | 'senior' | 'lead' | 'principal' | 'unknown';
-export type ApplicationEffort = 'low' | 'medium' | 'high' | 'very_high' | 'unknown';
-export type AIVerdict = 'apply' | 'strong_match' | 'review' | 'low_priority' | 'skip';
-export type HardFilterStatus = 'pass' | 'fail' | 'review' | 'unknown';
-export type HumanDecision = 'apply' | 'save' | 'skip' | 'review_later';
-export type RejectionReason = 
-  | 'compensation'
-  | 'location'
-  | 'work_authorization'
-  | 'working_hours'
-  | 'scope'
-  | 'seniority'
-  | 'application_effort'
-  | 'company'
-  | 'suspicious'
-  | 'not_interesting'
-  | 'other';
+export type WorkArrangement = 'remote' | 'hybrid' | 'onsite';
+export type EmploymentType = 'full_time' | 'contract' | 'freelance' | 'part_time';
+export type JobStatus = 'new' | 'saved' | 'skipped' | 'applied';
+export type Verdict = 'apply' | 'review' | 'skip' | 'save';
+export type ConfidenceLevel = 'high' | 'medium' | 'low' | 'unknown';
+export type ApplicationStatus = 'preparing' | 'applied' | 'interview' | 'challenge' | 'offer' | 'rejected';
 
-export type ApplicationStatus = 
-  | 'saved'
-  | 'preparing'
-  | 'applied'
-  | 'interview'
-  | 'challenge'
-  | 'offer'
-  | 'rejected'
-  | 'withdrawn';
-
-export interface LocationInfo {
+export interface Location {
   raw: string;
   country: string | null;
   region: string | null;
   city: string | null;
   work_arrangement: WorkArrangement;
-  timezone_requirements?: string[];
-  residency_required?: boolean;
-  work_authorization_required?: boolean;
-  relocation_available?: boolean;
+  timezone_requirements: string[];
+  residency_required: boolean;
+  work_authorization_required: boolean;
+  relocation_available: boolean;
 }
 
-export interface SalaryInfo {
+export interface Salary {
   min: number | null;
   max: number | null;
-  currency: string | null;
-  period: 'month' | 'year' | 'hour' | null;
+  currency: string;
+  period: 'year' | 'month' | 'hour';
   raw: string;
-  source?: 'job_description' | 'range_disclosed' | 'undisclosed' | 'ai_estimate';
-  confidence?: 'high' | 'medium' | 'low';
+  source: 'range_disclosed' | 'inferred' | 'external_estimate' | 'unknown';
+  confidence: ConfidenceLevel;
 }
 
-export interface WorkingHoursInfo {
+export interface WorkingHours {
   hours_per_day: number | null;
   hours_per_week: number | null;
   schedule: string | null;
   timezone: string | null;
-  weekend_required: boolean;
+  weekend_required: 'no' | 'occasional_compensated' | 'frequent_uncompensated' | 'unknown';
   after_hours_expected: boolean;
   on_call: boolean;
   notes: string | null;
 }
 
-export interface RequirementsInfo {
-  years_experience: {
-    min: number | null;
-    max: number | null;
-  };
-  degree_required: boolean;
-  skills: string[];
-  languages: string[];
-  work_authorization: string[];
-  other: string[];
+export interface TakeHomeAssignment {
+  required: boolean;
+  estimated_hours?: number | null;
+  description?: string;
+  compensated: boolean | 'unknown';
 }
 
-export interface ApplicationRequirementsInfo {
+export interface ApplicationRequirements {
   application_url: string;
   ats: string;
-  estimated_effort: ApplicationEffort;
+  estimated_effort: 'low' | 'medium' | 'high' | 'very_high' | 'unknown';
   estimated_minutes: number | null;
   cover_letter_required: boolean;
   portfolio_required: boolean;
   references_required: boolean;
   questions_count: number;
-  take_home: {
-    required: boolean;
-    estimated_hours: number | null;
-    description?: string;
-  };
+  take_home: TakeHomeAssignment;
   video_required: boolean;
 }
 
-export interface HardFilterResult {
-  status: HardFilterStatus;
-  reasons: string[];
+export type HardFilterReason = 
+  | 'equity_only' 
+  | 'unpaid' 
+  | 'us_w2_only' 
+  | 'onsite_required' 
+  | 'extreme_hours' 
+  | 'mandatory_weekends' 
+  | 'clear_scam'
+  | 'unpaid_take_home_extreme';
+
+export interface HardFilter {
+  status: 'pass' | 'review' | 'fail';
+  reasons: HardFilterReason[];
   warnings: string[];
 }
 
-export interface AIEvaluationDimensions {
-  role_fit: number;             // max 25
-  compensation_conditions: number; // max 25
-  location: number;             // max 15
-  experience: number;           // max 10
-  scope: number;                // max 10
-  application_effort: number;   // max 5
-  company: number;              // max 5
-  risk: number;                 // max 5
+export interface DimensionEvaluation {
+  score: number | null;
+  rationale: string;
+  confidence: ConfidenceLevel;
 }
 
 export interface AIEvaluation {
-  score: number; // 0 - 100
-  verdict: AIVerdict;
-  dimensions: AIEvaluationDimensions;
+  score: number; // Must strictly equal sum of dimension scores (ignoring nulls)
+  verdict: Verdict;
+  dimensions: {
+    role_fit: DimensionEvaluation; // 25
+    compensation_conditions: DimensionEvaluation; // 25
+    location: DimensionEvaluation; // 15
+    experience: DimensionEvaluation; // 10
+    scope: DimensionEvaluation; // 10
+    company: DimensionEvaluation; // 10
+    application_effort: DimensionEvaluation; // 5
+  };
   why_it_matches: string[];
   concerns: string[];
-  compensation_assessment: string;
-  location_assessment: string;
-  recommended_projects: string[];
-  evaluated_at: string;
+  evidence?: Array<{ quote: string; context: string }>;
+  unknowns?: string[];
+  evaluated_at: string; // ISO timestamp
 }
 
-export interface JobSource {
+export interface Source {
   id: string;
   source_name: string;
-  source_type: 'ats' | 'job_board' | 'company_site' | 'aggregator';
+  source_type: 'job_board' | 'company_site' | 'referral' | 'aggregator';
   source_url: string;
-  application_url: string;
+  application_url: string | null;
   discovered_at: string;
 }
 
-export interface HumanReview {
-  decision: HumanDecision | null;
-  reason?: RejectionReason | null;
-  notes?: string;
-  decided_at?: string;
+export interface DuplicateGroup {
+  is_canonical: boolean;
+  duplicate_count: number;
+  source_names: string[];
+}
+
+
+export interface DataConflict {
+  field: string;
+  description: string;
 }
 
 export interface Job {
@@ -140,48 +125,35 @@ export interface Job {
   title: string;
   company_id: string;
   company_name: string;
-  company_logo?: string;
-  company_industry?: string;
+  company_industry: string | null;
   description: string;
-  location: LocationInfo;
+  location: Location;
   work_arrangement: WorkArrangement;
   employment_type: EmploymentType;
-  seniority: SeniorityLevel;
-  salary: SalaryInfo;
-  working_hours?: WorkingHoursInfo;
+  seniority: string;
+  salary: Salary;
+  working_hours: WorkingHours;
   experience_required: string;
-  requirements: RequirementsInfo;
-  application_requirements: ApplicationRequirementsInfo;
-  hard_filter: HardFilterResult;
-  ai_evaluation: AIEvaluation;
-  sources: JobSource[];
-  duplicate_group?: {
-    is_canonical: boolean;
-    duplicate_count: number;
-    source_names: string[];
+  requirements: {
+    years_experience: { min: number | null; max: number | null };
+    degree_required: boolean;
+    skills: string[];
+    languages: string[];
+    work_authorization: string[];
+    other: string[];
   };
+  application_requirements: ApplicationRequirements;
+  hard_filter: HardFilter;
+  ai_evaluation: AIEvaluation;
+  sources: Source[];
+  conflicts?: DataConflict[];
+  duplicate_group?: DuplicateGroup;
   canonical_url: string;
   application_url: string;
-  posted_at: string | null;
-  discovered_at: string;
-  last_seen_at: string;
-  human_review?: HumanReview;
-  status: 'new' | 'reviewed' | 'saved' | 'skipped' | 'applied';
-}
-
-export interface Company {
-  id: string;
-  name: string;
-  website: string;
-  careers_url: string;
-  industry: string;
-  region: string;
-  description: string;
-  why_interesting: string;
-  saved: boolean;
-  open_roles_count: number;
-  last_checked_at: string;
-  notes?: string;
+  posted_at: string; // ISO
+  discovered_at: string; // ISO
+  last_seen_at: string; // ISO
+  status: JobStatus;
 }
 
 export interface JobApplication {
@@ -189,28 +161,45 @@ export interface JobApplication {
   job_id: string;
   job_title: string;
   company_name: string;
-  location: string;
-  salary_raw: string;
   status: ApplicationStatus;
   applied_at: string;
-  next_action?: string | null;
-  next_action_date?: string | null;
-  application_url: string;
+  last_updated_at: string;
   notes: string;
-  history: {
-    status: ApplicationStatus;
-    timestamp: string;
-    note?: string;
-  }[];
+  next_action?: string;
+  next_action_date?: string;
 }
 
+export interface Company {
+  id: string;
+  name: string;
+  industry: string;
+  region: string;
+  description: string;
+  why_interesting: string;
+  open_roles_count: number;
+  careers_url: string;
+  saved: boolean;
+}
+
+export type HumanDecision = 'apply' | 'save' | 'skip' | 'review_later';
+export type RejectionReason = 
+  | 'compensation' 
+  | 'working_hours' 
+  | 'location' 
+  | 'work_authorization' 
+  | 'scope' 
+  | 'application_effort' 
+  | 'seniority' 
+  | 'company' 
+  | 'suspicious' 
+  | 'not_interesting' 
+  | 'other';
+
 export interface ScanStats {
-  total_found: number;
-  duplicates_removed: number;
-  incompatible_removed: number;
-  evaluated: number;
+  total_scanned: number;
+  new_opportunities: number;
   strong_matches: number;
   worth_reviewing: number;
-  low_priority: number;
-  last_scan_at: string;
+  skipped_automatically: number;
+  last_scan_at: string; // ISO
 }

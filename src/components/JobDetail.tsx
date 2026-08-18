@@ -1,21 +1,5 @@
 import React, { useState } from 'react';
-import { 
-  Send, 
-  Bookmark, 
-  XCircle, 
-  ExternalLink, 
-  ShieldAlert, 
-  CheckCircle2, 
-  AlertTriangle, 
-  Sparkles, 
-  Layers, 
-  Briefcase
-} from 'lucide-react';
-import { 
-  Job, 
-  HumanDecision, 
-  RejectionReason 
-} from '../types/job';
+import { Job, HumanDecision, RejectionReason } from '../types/job';
 
 interface JobDetailProps {
   job: Job | null;
@@ -23,30 +7,30 @@ interface JobDetailProps {
 }
 
 const REJECTION_REASONS: { id: RejectionReason; label: string }[] = [
-  { id: 'compensation', label: 'Compensation too low' },
-  { id: 'working_hours', label: 'Working hours / Overtime' },
-  { id: 'location', label: 'Location / Timezone mismatch' },
-  { id: 'work_authorization', label: 'Work authorization barrier' },
-  { id: 'scope', label: 'Scope creep (Design + Dev + Marketing)' },
-  { id: 'application_effort', label: 'Application effort too high' },
-  { id: 'seniority', label: 'Seniority mismatch' },
-  { id: 'company', label: 'Company profile / Uninteresting' },
-  { id: 'suspicious', label: 'Suspicious / Scam signal' },
-  { id: 'not_interesting', label: 'Not interesting' },
-  { id: 'other', label: 'Other reason' }
+  { id: 'compensation', label: 'Compensación muy baja' },
+  { id: 'working_hours', label: 'Horas de trabajo / Horas extras' },
+  { id: 'location', label: 'Incompatibilidad de ubicación / Zona horaria' },
+  { id: 'work_authorization', label: 'Barrera de autorización de trabajo' },
+  { id: 'scope', label: 'Exceso de alcance (Diseño + Dev + Marketing)' },
+  { id: 'application_effort', label: 'Esfuerzo de aplicación muy alto' },
+  { id: 'seniority', label: 'Incompatibilidad de seniority' },
+  { id: 'company', label: 'Perfil de empresa / Poco interesante' },
+  { id: 'suspicious', label: 'Señal sospechosa / Estafa' },
+  { id: 'not_interesting', label: 'Poco interesante' },
+  { id: 'other', label: 'Otro motivo' }
 ];
 
 export const JobDetail: React.FC<JobDetailProps> = ({ job, onDecision }) => {
   const [showSkipModal, setShowSkipModal] = useState(false);
   const [selectedReason, setSelectedReason] = useState<RejectionReason>('compensation');
   const [customNote, setCustomNote] = useState('');
+  const [activeTab, setActiveTab] = useState<'analysis' | 'logistics' | 'description'>('analysis');
 
   if (!job) {
     return (
       <div className="empty-state-box">
-        <Briefcase size={36} />
-        <div className="empty-state-title">No job selected</div>
-        <div className="empty-state-desc">Select an opportunity from the Radar list to inspect its AI score and requirements.</div>
+        <div style={{ fontSize: '18px', fontWeight: 800 }}>Ninguna oportunidad seleccionada</div>
+        <div style={{ fontSize: '14px', marginTop: '8px' }}>Selecciona un elemento de la lista Radar para ver el análisis estructurado.</div>
       </div>
     );
   }
@@ -59,8 +43,7 @@ export const JobDetail: React.FC<JobDetailProps> = ({ job, onDecision }) => {
     application_requirements, 
     hard_filter,
     duplicate_group,
-    sources,
-    human_review
+    sources
   } = job;
 
   const handleConfirmSkip = () => {
@@ -70,390 +53,226 @@ export const JobDetail: React.FC<JobDetailProps> = ({ job, onDecision }) => {
 
   return (
     <div className="detail-panel">
-      {/* Top Action Bar */}
+      {/* Action Bar */}
       <div className="detail-top-action-bar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <a
-            href={job.application_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-action btn-apply-primary"
-          >
-            <span>Open Application</span>
-            <ExternalLink size={13} />
-          </a>
-
-          <button
-            className={`btn-action ${job.status === 'applied' ? 'active' : ''}`}
-            onClick={() => onDecision(job.id, 'apply')}
-            title="Mark as applied and add to tracker"
-          >
-            <Send size={13} color="var(--color-apply)" />
-            <span>{job.status === 'applied' ? 'Applied ✓' : 'Mark as Applied'}</span>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button className={`btn-action-quiet ${job.status === 'applied' ? 'active-apply' : 'primary'}`} onClick={() => { if (job.status !== 'applied') onDecision(job.id, 'apply'); }}>
+            {job.status === 'applied' ? 'Aplicada ✓' : 'Marcar como aplicada'}
           </button>
+          <a href={job.application_url} target="_blank" rel="noopener noreferrer" className="btn-action-quiet" style={{ textDecoration: 'none' }}>Abrir enlace ↗</a>
         </div>
-
-        <div className="action-buttons-group">
-          <button
-            className={`btn-action btn-save ${job.status === 'saved' ? 'active' : ''}`}
-            onClick={() => onDecision(job.id, job.status === 'saved' ? 'review_later' : 'save')}
-          >
-            <Bookmark size={13} />
-            <span>{job.status === 'saved' ? 'Saved' : 'Save'}</span>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button className={`btn-action-quiet ${job.status === 'saved' ? 'active-save' : ''}`} onClick={() => onDecision(job.id, job.status === 'saved' ? 'review_later' : 'save')}>
+            {job.status === 'saved' ? 'Guardada' : 'Guardar'}
           </button>
-
-          <button
-            className={`btn-action btn-skip ${job.status === 'skipped' ? 'active' : ''}`}
-            onClick={() => setShowSkipModal(true)}
-          >
-            <XCircle size={13} />
-            <span>{job.status === 'skipped' ? 'Skipped' : 'Skip'}</span>
+          <button className={`btn-action-quiet ${job.status === 'skipped' ? 'active-skip' : ''}`} onClick={() => setShowSkipModal(true)}>
+            {job.status === 'skipped' ? 'Omitida' : 'Omitir'}
           </button>
         </div>
       </div>
 
-      {/* Main Detail Body */}
       <div className="detail-body">
-        {/* Header Summary */}
-        <div className="detail-header-card">
-          <div className="detail-role-title">{job.title}</div>
-          <div className="detail-company-subtitle">
-            <span className="detail-company-name">{job.company_name}</span>
+        
+        {/* Workspace Header */}
+        <div className="detail-top-header">
+          <h1 className="detail-title">{job.title}</h1>
+          <div className="detail-subtitle">
+            <span style={{ color: 'var(--text-primary)' }}>{job.company_name}</span>
             {job.company_industry && <span>· {job.company_industry}</span>}
-            <span>· Discovered {new Date(job.discovered_at).toLocaleDateString()}</span>
+            <span style={{ color: 'var(--text-tertiary)', fontSize: '14px' }}>· Descubierto {new Date(job.discovered_at).toLocaleDateString()}</span>
           </div>
-
-          <div className="detail-meta-grid">
-            <div className="meta-field">
-              <span className="meta-label">Compensation</span>
-              <span className="meta-value highlight-blue">{salary.raw}</span>
-            </div>
-            <div className="meta-field">
-              <span className="meta-label">Location / Setup</span>
-              <span className="meta-value">{location.raw}</span>
-            </div>
-            <div className="meta-field">
-              <span className="meta-label">Employment Type</span>
-              <span className="meta-value" style={{ textTransform: 'capitalize' }}>
-                {job.employment_type.replace('_', ' ')} · {job.seniority}
-              </span>
-            </div>
-            <div className="meta-field">
-              <span className="meta-label">Application Platform</span>
-              <span className="meta-value">{application_requirements.ats} (Effort: {application_requirements.estimated_effort})</span>
-            </div>
+          
+          <div className="detail-chips" style={{ marginTop: '12px' }}>
+            <span className="ui-chip purple">{salary.raw}</span>
+            <span className="ui-chip info">{location.raw}</span>
+            <span className="ui-chip neutral" style={{ textTransform: 'capitalize' }}>{job.employment_type.replace('_', ' ')}</span>
+            <span className="ui-chip neutral">{job.seniority}</span>
+            <span className={`ui-chip ${application_requirements.estimated_effort === 'low' ? 'positive' : application_requirements.estimated_effort === 'high' ? 'warning' : 'neutral'}`}>
+              Esfuerzo: {application_requirements.estimated_effort}
+            </span>
+            <span className="ui-chip neutral">{application_requirements.ats}</span>
           </div>
         </div>
 
-        {/* Hard Filter Alert if failed */}
         {hard_filter.status === 'fail' && (
-          <div style={{
-            background: 'var(--color-skip-bg)',
-            border: '1px solid var(--color-skip-border)',
-            borderRadius: 'var(--radius-md)',
-            padding: '14px',
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: '10px'
-          }}>
-            <ShieldAlert size={20} color="var(--color-skip)" style={{ flexShrink: 0, marginTop: '2px' }} />
-            <div>
-              <div style={{ fontWeight: 700, color: 'var(--color-skip)', fontSize: '13px' }}>Hard Incompatibility Detected</div>
-              <ul style={{ marginTop: '4px', paddingLeft: '16px', fontSize: '12.5px', color: 'var(--text-primary)' }}>
-                {hard_filter.reasons.map((r, i) => (
-                  <li key={i}>{r}</li>
-                ))}
-              </ul>
-            </div>
+          <div className="ui-card" style={{ borderColor: 'var(--color-danger)', background: 'var(--color-danger-bg)' }}>
+            <div className="ui-card-header" style={{ color: 'var(--color-danger)', borderBottomColor: 'rgba(239, 68, 68, 0.3)' }}>Incompatibilidad estricta</div>
+            <ul className="signal-list hard-fail">
+              {hard_filter.reasons.map((r, i) => <li key={i}>{r}</li>)}
+            </ul>
           </div>
         )}
 
-        {/* AI Assessment Card */}
-        <div className="ai-assessment-box">
-          <div className="ai-header-row">
-            <div className="ai-title-group">
-              <Sparkles size={18} color="var(--color-apply)" />
-              <span style={{ fontWeight: 700, fontSize: '14px' }}>AI Match Assessment</span>
-              <span className="ai-pill-badge">Model Recommendation</span>
-            </div>
-
-            <div className="ai-verdict-banner">
-              <span style={{ color: 'var(--text-muted)' }}>Score:</span>
-              <span className="font-mono" style={{ fontSize: '18px', color: 'var(--color-apply)' }}>{ai_evaluation.score}</span>
-              <span style={{ color: 'var(--text-muted)' }}>/ 100</span>
-              <span className={`score-badge verdict-${ai_evaluation.verdict}`} style={{ marginLeft: '6px' }}>
-                {ai_evaluation.verdict.replace('_', ' ').toUpperCase()}
-              </span>
-            </div>
-          </div>
-
-          {/* 8 Scoring Dimensions */}
-          <div className="dimensions-grid">
-            <div className="dimension-item">
-              <div className="dimension-label-row">
-                <span>Role Fit</span>
-                <span className="font-mono">{ai_evaluation.dimensions.role_fit}/25</span>
-              </div>
-              <div className="dimension-bar-track">
-                <div className="dimension-bar-fill" style={{ width: `${(Math.max(0, ai_evaluation.dimensions.role_fit) / 25) * 100}%` }} />
-              </div>
-            </div>
-
-            <div className="dimension-item">
-              <div className="dimension-label-row">
-                <span>Comp & Hours</span>
-                <span className="font-mono">{ai_evaluation.dimensions.compensation_conditions}/25</span>
-              </div>
-              <div className="dimension-bar-track">
-                <div className="dimension-bar-fill" style={{ width: `${(Math.max(0, ai_evaluation.dimensions.compensation_conditions) / 25) * 100}%` }} />
-              </div>
-            </div>
-
-            <div className="dimension-item">
-              <div className="dimension-label-row">
-                <span>Location</span>
-                <span className="font-mono">{ai_evaluation.dimensions.location}/15</span>
-              </div>
-              <div className="dimension-bar-track">
-                <div className="dimension-bar-fill" style={{ width: `${(Math.max(0, ai_evaluation.dimensions.location) / 15) * 100}%` }} />
-              </div>
-            </div>
-
-            <div className="dimension-item">
-              <div className="dimension-label-row">
-                <span>Seniority/Exp</span>
-                <span className="font-mono">{ai_evaluation.dimensions.experience}/10</span>
-              </div>
-              <div className="dimension-bar-track">
-                <div className="dimension-bar-fill" style={{ width: `${(Math.max(0, ai_evaluation.dimensions.experience) / 10) * 100}%` }} />
-              </div>
-            </div>
-
-            <div className="dimension-item">
-              <div className="dimension-label-row">
-                <span>Scope Quality</span>
-                <span className="font-mono">{ai_evaluation.dimensions.scope}/10</span>
-              </div>
-              <div className="dimension-bar-track">
-                <div className="dimension-bar-fill" style={{ width: `${(Math.max(0, ai_evaluation.dimensions.scope) / 10) * 100}%` }} />
-              </div>
-            </div>
-
-            <div className="dimension-item">
-              <div className="dimension-label-row">
-                <span>App Effort</span>
-                <span className="font-mono">{ai_evaluation.dimensions.application_effort}/5</span>
-              </div>
-              <div className="dimension-bar-track">
-                <div className="dimension-bar-fill" style={{ width: `${(Math.max(0, ai_evaluation.dimensions.application_effort) / 5) * 100}%` }} />
-              </div>
-            </div>
-          </div>
-
-          {/* Why it Matches */}
-          {ai_evaluation.why_it_matches.length > 0 && (
-            <div className="assessment-section">
-              <div className="assessment-title matches">
-                <CheckCircle2 size={14} color="var(--color-apply)" />
-                <span>Why it matches Robert</span>
-              </div>
-              <ul className="assessment-list">
-                {ai_evaluation.why_it_matches.map((item, idx) => (
-                  <li key={idx}>
-                    <CheckCircle2 size={13} className="bullet-icon green" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Concerns & Risks */}
-          {ai_evaluation.concerns.length > 0 && (
-            <div className="assessment-section">
-              <div className="assessment-title concerns">
-                <AlertTriangle size={14} color="var(--color-review)" />
-                <span>Concerns & Unknowns</span>
-              </div>
-              <ul className="assessment-list">
-                {ai_evaluation.concerns.map((item, idx) => (
-                  <li key={idx}>
-                    <AlertTriangle size={13} className="bullet-icon amber" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Contextual Assessments */}
-          <div className="assessment-context-grid">
-            <div className="context-card">
-              <span className="context-card-title">Compensation & Workload Assessment</span>
-              <p className="context-card-content">{ai_evaluation.compensation_assessment}</p>
-            </div>
-
-            <div className="context-card">
-              <span className="context-card-title">Location & Eligibility Assessment</span>
-              <p className="context-card-content">{ai_evaluation.location_assessment}</p>
-            </div>
-          </div>
-
-          {/* Recommended Portfolio Projects */}
-          {ai_evaluation.recommended_projects.length > 0 && (
-            <div className="portfolio-recommendation-box">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 700, color: 'var(--color-purple)' }}>
-                <Sparkles size={14} />
-                <span>Recommended Portfolio Projects to Feature</span>
-              </div>
-              <div className="portfolio-badge-list">
-                {ai_evaluation.recommended_projects.map(proj => (
-                  <span key={proj} className="portfolio-chip">
-                    <span>{proj}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+        {/* Local Navigation Tabs */}
+        <div className="local-tabs">
+          <button className={`local-tab ${activeTab === 'analysis' ? 'active' : ''}`} onClick={() => setActiveTab('analysis')}>Análisis de decisión</button>
+          <button className={`local-tab ${activeTab === 'logistics' ? 'active' : ''}`} onClick={() => setActiveTab('logistics')}>Empresa y logística</button>
+          <button className={`local-tab ${activeTab === 'description' ? 'active' : ''}`} onClick={() => setActiveTab('description')}>Descripción original</button>
         </div>
 
-        {/* Application Effort Intelligence */}
-        <div className="effort-card">
-          <div className="effort-stat">
-            <span className="effort-stat-label">Application Friction</span>
-            <span className={`effort-stat-val ${application_requirements.estimated_effort === 'low' ? 'highlight-green' : ''}`}>
-              {application_requirements.estimated_effort.toUpperCase()}
-            </span>
-          </div>
-
-          <div className="effort-stat">
-            <span className="effort-stat-label">Estimated Time</span>
-            <span className="effort-stat-val">
-              {application_requirements.estimated_minutes ? `~${application_requirements.estimated_minutes} mins` : 'Unknown'}
-            </span>
-          </div>
-
-          <div className="effort-stat">
-            <span className="effort-stat-label">Questions</span>
-            <span className="effort-stat-val">{application_requirements.questions_count} questions</span>
-          </div>
-
-          <div className="effort-stat">
-            <span className="effort-stat-label">Take-Home Test</span>
-            <span className="effort-stat-val">
-              {application_requirements.take_home.required ? (
-                <span style={{ color: 'var(--color-review)' }}>
-                  Required ({application_requirements.take_home.estimated_hours || '3+'} hrs)
+        {/* Tab Content: Analysis */}
+        {activeTab === 'analysis' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            
+            <div className="ui-card">
+              <div className="ui-card-header">
+                <span>Evaluación de dimensiones</span>
+                <span className={`ui-chip ${ai_evaluation.score >= 80 ? 'positive' : ai_evaluation.score >= 60 ? 'warning' : 'neutral'}`}>
+                  {ai_evaluation.verdict.replace('_', ' ').toUpperCase()}
                 </span>
-              ) : (
-                <span style={{ color: 'var(--color-apply)' }}>None</span>
-              )}
-            </span>
-          </div>
-        </div>
-
-        {/* Duplicate Sources Grouping */}
-        {duplicate_group && duplicate_group.duplicate_count > 1 && (
-          <div className="sources-card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 700, color: 'var(--color-purple)' }}>
-              <Layers size={14} />
-              <span>Deduplicated Canonical Opportunity (Found across {duplicate_group.duplicate_count} sources)</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              {sources.map(src => (
-                <div key={src.id} className="source-item-row">
-                  <span><strong>{src.source_name}</strong> ({src.source_type})</span>
-                  <a href={src.source_url} target="_blank" rel="noopener noreferrer" className="source-link">
-                    <span>View original listing</span>
-                    <ExternalLink size={12} />
-                  </a>
+              </div>
+              <div className="ai-score-row">
+                <div className="ai-score-hero">
+                  <span className={`ai-score-number ${ai_evaluation.score >= 80 ? 'score-strong' : ai_evaluation.score >= 60 ? 'score-review' : 'score-low'}`}>
+                    {ai_evaluation.score}
+                  </span>
+                  <span style={{ fontSize: '13px', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>De 100</span>
                 </div>
-              ))}
+                <div className="eval-table">
+                  <div className="eval-item-container" style={{marginBottom: '12px'}}>
+     <div className="eval-row" style={{borderBottom: 'none', paddingBottom: '0'}}>
+       <span className="eval-key">Coincidencia de rol y dominio</span>
+       <span className="eval-val">{ai_evaluation.dimensions.role_fit?.score ?? '—'} / 25</span>
+     </div>
+     <div style={{fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: '1.4'}}>{ai_evaluation.dimensions.role_fit?.rationale}</div>
+   </div>
+                  <div className="eval-item-container" style={{marginBottom: '12px'}}>
+     <div className="eval-row" style={{borderBottom: 'none', paddingBottom: '0'}}>
+       <span className="eval-key">Compensación y condiciones</span>
+       <span className="eval-val">{ai_evaluation.dimensions.compensation_conditions?.score ?? '—'} / 25</span>
+     </div>
+     <div style={{fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: '1.4'}}>{ai_evaluation.dimensions.compensation_conditions?.rationale}</div>
+   </div>
+                  <div className="eval-item-container" style={{marginBottom: '12px'}}>
+     <div className="eval-row" style={{borderBottom: 'none', paddingBottom: '0'}}>
+       <span className="eval-key">Ubicación y elegibilidad</span>
+       <span className="eval-val">{ai_evaluation.dimensions.location?.score ?? '—'} / 15</span>
+     </div>
+     <div style={{fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: '1.4'}}>{ai_evaluation.dimensions.location?.rationale}</div>
+   </div>
+                  <div className="eval-item-container" style={{marginBottom: '12px'}}>
+     <div className="eval-row" style={{borderBottom: 'none', paddingBottom: '0'}}>
+       <span className="eval-key">Coincidencia de experiencia</span>
+       <span className="eval-val">{ai_evaluation.dimensions.experience?.score ?? '—'} / 10</span>
+     </div>
+     <div style={{fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: '1.4'}}>{ai_evaluation.dimensions.experience?.rationale}</div>
+   </div>
+                  <div className="eval-item-container" style={{marginBottom: '12px'}}>
+     <div className="eval-row" style={{borderBottom: 'none', paddingBottom: '0'}}>
+       <span className="eval-key">Calidad del alcance</span>
+       <span className="eval-val">{ai_evaluation.dimensions.scope?.score ?? '—'} / 10</span>
+     </div>
+     <div style={{fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: '1.4'}}>{ai_evaluation.dimensions.scope?.rationale}</div>
+   </div>
+                  <div className="eval-row"><span className="eval-key">Calidad de la empresa</span><span className="eval-val">{ai_evaluation.dimensions.company_opportunity_quality ?? 0} / 10</span></div>
+                  <div className="eval-item-container" style={{marginBottom: '12px'}}>
+     <div className="eval-row" style={{borderBottom: 'none', paddingBottom: '0'}}>
+       <span className="eval-key">Esfuerzo de aplicación</span>
+       <span className="eval-val">{ai_evaluation.dimensions.application_effort?.score ?? '—'} / 5</span>
+     </div>
+     <div style={{fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: '1.4'}}>{ai_evaluation.dimensions.application_effort?.rationale}</div>
+   </div>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
 
-        {/* Working Hours & Boundaries */}
-        {working_hours && (
-          <div className="job-description-box">
-            <h4>Working Hours & Culture</h4>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '12.5px' }}>
-              <div><strong>Weekly Hours:</strong> {working_hours.hours_per_week || '40'} hrs/week</div>
-              <div><strong>Schedule:</strong> {working_hours.schedule || 'Standard business hours'}</div>
-              <div><strong>Weekends Required:</strong> {working_hours.weekend_required ? 'Yes (Red flag)' : 'No'}</div>
-              <div><strong>On-Call:</strong> {working_hours.on_call ? 'Yes' : 'No'}</div>
+            <div className="context-grid">
+              <div className="ui-card">
+                <div className="ui-card-header">Evidencia positiva</div>
+                <ul className="signal-list matches">
+                  {ai_evaluation.why_it_matches.length > 0 ? ai_evaluation.why_it_matches.map((item, idx) => <li key={idx}>{item}</li>) : <li style={{ color: 'var(--text-tertiary)' }}>No se encontraron coincidencias fuertes.</li>}
+                </ul>
+              </div>
+              <div className="ui-card">
+                <div className="ui-card-header">Preocupaciones y puntos desconocidos</div>
+                <ul className="signal-list warnings">
+                  {ai_evaluation.concerns.map((item, idx) => <li key={idx}>{item}</li>)}
+                  {ai_evaluation.unknowns && ai_evaluation.unknowns.map((item, idx) => <li key={`u-${idx}`} style={{ color: 'var(--text-tertiary)' }}>Falta: {item}</li>)}
+                  {ai_evaluation.concerns.length === 0 && (!ai_evaluation.unknowns || ai_evaluation.unknowns.length === 0) && <li style={{ color: 'var(--text-tertiary)' }}>No se detectaron preocupaciones importantes.</li>}
+                </ul>
+              </div>
             </div>
-            {working_hours.notes && (
-              <p style={{ marginTop: '8px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                {working_hours.notes}
-              </p>
+
+            {ai_evaluation.evidence && ai_evaluation.evidence.length > 0 && (
+              <div className="ui-card">
+                 <div className="ui-card-header">Evidencia contextual directa</div>
+                 {ai_evaluation.evidence.map((ev, i) => (
+                   <blockquote key={i} style={{ borderLeft: '3px solid var(--border-strong)', paddingLeft: '16px', color: 'var(--text-secondary)', fontSize: '14px', fontStyle: 'italic', marginBottom: '12px' }}>
+                     "{ev.quote}" — <span style={{ color: 'var(--text-tertiary)', fontStyle: 'normal', fontSize: '13px' }}>{ev.context}</span>
+                   </blockquote>
+                 ))}
+              </div>
             )}
           </div>
         )}
 
-        {/* Full Job Description */}
-        <div className="job-description-box">
-          <h4>Original Job Description</h4>
-          <div className="description-text">{job.description}</div>
-        </div>
+        {/* Tab Content: Logistics */}
+        {activeTab === 'logistics' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div className="ui-card">
+              <div className="ui-card-header">Logística de aplicación</div>
+              <ul className="signal-list">
+                <li>Plataforma: <strong>{application_requirements.ats}</strong></li>
+                <li>Tiempo estimado: <strong>{application_requirements.estimated_minutes ? `~${application_requirements.estimated_minutes} mins` : 'Desconocido'}</strong></li>
+                <li>Preguntas personalizadas: <strong>{application_requirements.questions_count}</strong></li>
+                <li>Prueba técnica: <strong className={application_requirements.take_home.required ? 'score-skip' : ''}>{application_requirements.take_home.required ? `Requerida (~ ${application_requirements.take_home.estimated_hours || 3} hrs)` : 'No especificada'}</strong></li>
+              </ul>
+            </div>
+            
+            <div className="ui-card">
+               <div className="ui-card-header">Evaluación de compensación y horas</div>
+               <p className="text-block" style={{ marginBottom: '12px' }}><strong>Lógica de compensación:</strong> {ai_evaluation.compensation_assessment}</p>
+               <p className="text-block" style={{ marginBottom: '12px' }}><strong>Lógica de ubicación:</strong> {ai_evaluation.location_assessment}</p>
+               {working_hours && (
+                 <p className="text-block">
+                   <strong>Horas de trabajo:</strong> {working_hours.hours_per_week || '40'} hrs/sem. 
+                   {working_hours.weekend_required ? ' Fines de semana requeridos.' : ''} 
+                   {working_hours.on_call ? ' Guardias requeridas.' : ''}
+                 </p>
+               )}
+            </div>
 
-        {/* Human review history if existing */}
-        {human_review?.decision && (
-          <div style={{
-            background: 'var(--bg-card)',
-            padding: '12px',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--border-subtle)',
-            fontSize: '12px'
-          }}>
-            <strong>Human Review Recorded:</strong> Decision: <span style={{ textTransform: 'capitalize' }}>{human_review.decision}</span>
-            {human_review.reason && <span> · Reason: {human_review.reason}</span>}
-            {human_review.notes && <div style={{ marginTop: '4px', color: 'var(--text-secondary)' }}>Notes: {human_review.notes}</div>}
+            {duplicate_group && duplicate_group.duplicate_count > 1 && (
+              <div className="ui-card">
+                <div className="ui-card-header">Fuentes duplicadas ({duplicate_group.duplicate_count})</div>
+                <ul className="signal-list">
+                  {sources.map(src => (
+                    <li key={src.id}>
+                      <a href={src.source_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>
+                        {src.source_name} ↗
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
+
+        {/* Tab Content: Description */}
+        {activeTab === 'description' && (
+          <div className="ui-card">
+            <div className="ui-card-header">Descripción original de la oportunidad</div>
+            <div className="prose">{job.description}</div>
+          </div>
+        )}
+
       </div>
 
-      {/* Rejection Reason Modal */}
+      {/* Rejection Modal */}
       {showSkipModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3 className="modal-title">Record Rejection Reason</h3>
-            <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-              Help Job Radar refine future prioritizations for Robert:
-            </p>
-
+            <h3 className="modal-title">Registrar motivo de omisión</h3>
             <div className="reasons-grid">
               {REJECTION_REASONS.map(r => (
-                <button
-                  key={r.id}
-                  className={`btn-reason-option ${selectedReason === r.id ? 'selected' : ''}`}
-                  onClick={() => setSelectedReason(r.id)}
-                >
-                  {r.label}
-                </button>
+                <button key={r.id} className={`btn-reason-option ${selectedReason === r.id ? 'selected' : ''}`} onClick={() => setSelectedReason(r.id)}>{r.label}</button>
               ))}
             </div>
-
-            <input
-              type="text"
-              placeholder="Optional notes..."
-              value={customNote}
-              onChange={(e) => setCustomNote(e.target.value)}
-            />
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '10px' }}>
-              <button
-                className="btn-action"
-                onClick={() => setShowSkipModal(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="btn-action btn-skip active"
-                onClick={handleConfirmSkip}
-              >
-                Confirm Skip
-              </button>
+            <input type="text" className="text-input" placeholder="Notas opcionales..." value={customNote} onChange={(e) => setCustomNote(e.target.value)} />
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              <button className="btn-action-quiet" onClick={() => setShowSkipModal(false)}>Cancelar</button>
+              <button className="btn-action-quiet active-skip" onClick={handleConfirmSkip}>Confirmar omisión</button>
             </div>
           </div>
         </div>

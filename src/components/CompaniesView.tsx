@@ -1,5 +1,4 @@
 import React from 'react';
-import { Bookmark, ExternalLink } from 'lucide-react';
 import { Company } from '../types/job';
 
 interface CompaniesViewProps {
@@ -7,66 +6,41 @@ interface CompaniesViewProps {
   onToggleSave: (companyId: string) => void;
 }
 
-export const CompaniesView: React.FC<CompaniesViewProps> = ({
-  companies,
-  onToggleSave
-}) => {
+export const CompaniesView: React.FC<CompaniesViewProps> = ({ companies, onToggleSave }) => {
   return (
-    <div className="view-container">
-      <div className="view-header">
-        <div>
-          <h2 className="view-title">Company Radar</h2>
-          <div className="view-subtitle">Saved target companies tracked for product excellence, remote culture, and open designer roles.</div>
-        </div>
+    <div className="generic-view-container">
+      <div className="detail-top-header" style={{ marginBottom: '16px' }}>
+        <h2 className="detail-title">Radar de empresas</h2>
+        <div className="detail-subtitle">Empresas en seguimiento conocidas por la excelencia de sus productos y sólida cultura remota.</div>
       </div>
 
       <div className="companies-grid">
         {companies.map(company => (
-          <div key={company.id} className="company-card">
-            <div className="company-card-header">
-              <div>
-                <div className="company-card-title">{company.name}</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{company.industry} · {company.region}</div>
+          <div key={company.id} className="ui-card" style={{ padding: '20px', gap: '12px', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)' }}>{company.name}</div>
+                <button className={`btn-action-quiet ${company.saved ? 'active-save' : ''}`} style={{ padding: '6px 12px', fontSize: '12px' }} onClick={() => onToggleSave(company.id)}>
+                  {company.saved ? 'Siguiendo' : 'Seguir'}
+                </button>
               </div>
-
-              <button
-                className={`btn-action btn-save ${company.saved ? 'active' : ''}`}
-                onClick={() => onToggleSave(company.id)}
-                style={{ padding: '4px 8px' }}
-              >
-                <Bookmark size={12} />
-                <span>{company.saved ? 'Tracked' : 'Track'}</span>
-              </button>
+              
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                <span className="ui-chip neutral">{company.industry}</span>
+                <span className="ui-chip info">{company.region}</span>
+              </div>
+              
+              <p className="prose" style={{ fontSize: '13px', lineHeight: 1.6, marginBottom: '16px' }}>{company.description}</p>
+              
+              <div style={{ background: 'var(--bg-panel)', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)', marginBottom: '16px' }}>
+                <span style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '4px' }}>Por qué es interesante</span>
+                <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{company.why_interesting}</span>
+              </div>
             </div>
 
-            <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-              {company.description}
-            </p>
-
-            <div style={{
-              background: 'var(--bg-panel-subtle)',
-              padding: '8px 10px',
-              borderRadius: 'var(--radius-xs)',
-              fontSize: '11.5px',
-              color: 'var(--color-apply)'
-            }}>
-              <strong>Why interesting:</strong> {company.why_interesting}
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px', fontSize: '12px' }}>
-              <span style={{ color: 'var(--text-muted)' }}>
-                Open roles: <strong>{company.open_roles_count}</strong>
-              </span>
-
-              <a
-                href={company.careers_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="source-link"
-              >
-                <span>Careers Portal</span>
-                <ExternalLink size={12} />
-              </a>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
+              <span className="ui-chip neutral">Roles abiertos: {company.open_roles_count}</span>
+              <a href={company.careers_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-primary)', textDecoration: 'none', fontWeight: 700, fontSize: '13px' }}>Carreras ↗</a>
             </div>
           </div>
         ))}

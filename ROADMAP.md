@@ -334,7 +334,7 @@ Evaluate the remaining opportunities using Robert's rules.
 - Scope
 - Application effort
 - Company
-- Risks
+- Warnings and missing information
 
 ## Output
 
@@ -626,7 +626,7 @@ Use this to evaluate:
 - Application-effort estimation
 - Role matching
 
-Then adjust scoring weights.
+Then refine qualitative evaluation rules (preserving the 100-point numeric structure).
 
 Do not attempt sophisticated machine learning until there is enough real data to justify it.
 
@@ -731,7 +731,7 @@ The project should grow through validated increments rather than feature accumul
 | Job rules | Complete |
 | Data model | Complete |
 | Roadmap | Complete |
-| Phase 1 — UI prototype | Not started |
+| Phase 1 — UI prototype | In progress (NEXT) |
 | Phase 2 — Local data | Not started |
 | Phase 3 — Job discovery | Not started |
 | Phase 4 — Deduplication | Not started |

@@ -36,29 +36,22 @@ export const RadarView: React.FC<RadarViewProps> = ({
     <div className="radar-view-container">
       {/* Left List Pane */}
       <div className="radar-left-pane">
-        {/* Metrics Banner */}
         <div className="scan-metrics-bar">
           <div className="stats-group">
             <div className="stat-item">
-              <span>Radar:</span>
-              <span className="stat-val highlight">{stats.strong_matches} Strong</span>
+              <span className="stat-val score-strong" style={{ marginRight: '4px' }}>{stats.strong_matches}</span>
+              <span>Fuerte</span>
             </div>
             <div className="stat-item">
-              <span>Review:</span>
-              <span className="stat-val">{stats.worth_reviewing}</span>
-            </div>
-            <div className="stat-item">
-              <span>Deduplicated:</span>
-              <span className="stat-val">{stats.duplicates_removed}</span>
+              <span className="stat-val" style={{ marginRight: '4px' }}>{stats.worth_reviewing}</span>
+              <span>Revisar</span>
             </div>
           </div>
-
-          <span style={{ fontSize: '10.5px', color: 'var(--text-dim)' }}>
-            Last scan: {new Date(stats.last_scan_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>
+            Última búsqueda: {new Date(stats.last_scan_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
         </div>
 
-        {/* Job List Component */}
         <JobList
           jobs={jobs}
           selectedJobId={selectedJobId}

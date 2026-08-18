@@ -1,5 +1,4 @@
 import React from 'react';
-import { Bookmark, ExternalLink, Trash2 } from 'lucide-react';
 import { Job, HumanDecision } from '../types/job';
 
 interface SavedViewProps {
@@ -8,84 +7,41 @@ interface SavedViewProps {
   onDecision: (jobId: string, decision: HumanDecision) => void;
 }
 
-export const SavedView: React.FC<SavedViewProps> = ({
-  savedJobs,
-  onSelectJob,
-  onDecision
-}) => {
+export const SavedView: React.FC<SavedViewProps> = ({ savedJobs, onSelectJob, onDecision }) => {
   return (
-    <div className="view-container">
-      <div className="view-header">
-        <div>
-          <h2 className="view-title">Saved Opportunities</h2>
-          <div className="view-subtitle">High-priority positions bookmarked for deep review and application.</div>
-        </div>
+    <div className="generic-view-container">
+      <div className="detail-top-header" style={{ marginBottom: '16px' }}>
+        <h2 className="detail-title">Oportunidades guardadas</h2>
+        <div className="detail-subtitle">Posiciones de alta prioridad guardadas para revisión profunda y aplicación.</div>
       </div>
 
       {savedJobs.length === 0 ? (
         <div className="empty-state-box">
-          <Bookmark size={36} />
-          <div className="empty-state-title">No saved opportunities yet</div>
-          <div className="empty-state-desc">
-            Bookmark promising roles on the Radar tab to keep track of them here.
-          </div>
+          <div style={{ fontSize: '16px', fontWeight: 700 }}>No hay oportunidades guardadas</div>
+          <div style={{ fontSize: '14px', marginTop: '4px' }}>Guarda roles en la pestaña Radar para verlos aquí.</div>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {savedJobs.map(job => (
-            <div 
-              key={job.id} 
-              style={{
-                background: 'var(--bg-panel)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: 'var(--radius-md)',
-                padding: '16px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '16px'
-              }}
-            >
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>{job.title}</span>
-                  <span className={`score-badge verdict-${job.ai_evaluation.verdict}`}>
-                    {job.ai_evaluation.score} Score
+        <div className="ui-card" style={{ padding: '0', gap: '0' }}>
+          {savedJobs.map((job, idx) => (
+            <div key={job.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderBottom: idx < savedJobs.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>{job.title}</div>
+                  <span className="ui-chip positive">Puntaje: {job.ai_evaluation.score}</span>
+                </div>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <span style={{ fontSize: '14px', color: 'var(--text-secondary)', fontWeight: 700 }}>{job.company_name}</span>
+                  <span className="ui-chip neutral">{job.location.raw}</span>
+                  <span className="ui-chip purple">{job.salary.raw}</span>
+                  <span className={`ui-chip ${job.application_requirements.estimated_effort === 'low' ? 'positive' : job.application_requirements.estimated_effort === 'high' ? 'warning' : 'neutral'}`}>
+                    Esfuerzo: {job.application_requirements.estimated_effort}
                   </span>
                 </div>
-                <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                  {job.company_name} · {job.location.raw} · <span style={{ color: '#38bdf8' }}>{job.salary.raw}</span>
-                </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Application Effort: {job.application_requirements.estimated_effort.toUpperCase()} ({job.application_requirements.ats})
-                </div>
               </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <button
-                  className="btn-action"
-                  onClick={() => onSelectJob(job.id)}
-                >
-                  View Details
-                </button>
-
-                <a
-                  href={job.application_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-action btn-apply-primary"
-                >
-                  <span>Apply</span>
-                  <ExternalLink size={12} />
-                </a>
-
-                <button
-                  className="btn-action"
-                  onClick={() => onDecision(job.id, 'review_later')}
-                  title="Remove from saved"
-                >
-                  <Trash2 size={13} color="var(--color-skip)" />
-                </button>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <button className="btn-action-quiet" onClick={() => onSelectJob(job.id)}>Detalles</button>
+                <a href={job.application_url} target="_blank" rel="noopener noreferrer" className="btn-action-quiet active-apply" style={{ textDecoration: 'none' }}>Aplicar</a>
+                <button className="btn-action-quiet" onClick={() => onDecision(job.id, 'review_later')}>Eliminar</button>
               </div>
             </div>
           ))}

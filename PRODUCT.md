@@ -140,7 +140,7 @@ Remaining jobs receive:
 - AI Score.
 - Verdict.
 - Reasons.
-- Risks.
+- Unknowns and warnings.
 - Compensation assessment.
 - Location assessment.
 - Application effort estimate.
@@ -346,7 +346,7 @@ A concise explanation grounded in the job posting.
 
 **Concerns**
 
-Specific risks, missing information, or mismatches.
+Missing information, evidence constraints, or mismatches.
 
 **Compensation & conditions**
 
@@ -409,7 +409,7 @@ The score should never be presented without context.
 - **🟠 Low priority**
 - **🔴 Skip**
 
-The exact thresholds should remain configurable during MVP development.
+The canonical 100-point scoring weights are final.
 
 ### Important
 
@@ -633,7 +633,7 @@ A user should understand a job's:
 - location
 - compensation
 - score
-- risk
+- company_opportunity_quality
 - effort
 
 within seconds.

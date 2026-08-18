@@ -21,28 +21,19 @@ export const JobList: React.FC<JobListProps> = ({
   setFilters,
   totalCount
 }) => {
-  // Keyboard navigation support (ArrowUp, ArrowDown)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') {
-        return;
-      }
-
+      if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
       if (e.key === 'ArrowDown' || e.key === 'j') {
         e.preventDefault();
         const currentIndex = jobs.findIndex(j => j.id === selectedJobId);
-        if (currentIndex < jobs.length - 1) {
-          onSelectJob(jobs[currentIndex + 1].id);
-        }
+        if (currentIndex < jobs.length - 1) onSelectJob(jobs[currentIndex + 1].id);
       } else if (e.key === 'ArrowUp' || e.key === 'k') {
         e.preventDefault();
         const currentIndex = jobs.findIndex(j => j.id === selectedJobId);
-        if (currentIndex > 0) {
-          onSelectJob(jobs[currentIndex - 1].id);
-        }
+        if (currentIndex > 0) onSelectJob(jobs[currentIndex - 1].id);
       }
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [jobs, selectedJobId, onSelectJob]);
@@ -50,59 +41,55 @@ export const JobList: React.FC<JobListProps> = ({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Filter toolbar */}
-      <div className="filter-toolbar">
-        <div className="filter-search-row">
+      <div style={{ padding: '16px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', gap: '8px' }}>
           <div className="search-input-wrapper">
             <Search size={14} />
             <input
               type="text"
-              placeholder="Search by title, company, skills (e.g. Fintech, Figma)..."
+              className="search-input"
+              placeholder="Search roles, companies..."
               value={filters.searchQuery}
               onChange={(e) => setFilters(prev => ({ ...prev, searchQuery: e.target.value }))}
             />
           </div>
-
           <select
-            className="select-filter"
+            className="filter-select"
             value={filters.sortBy}
             onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value as FilterState['sortBy'] }))}
-            title="Sort jobs"
           >
             <option value="score_desc">Highest AI Score</option>
             <option value="date_desc">Newest Discovered</option>
-            <option value="salary_desc">Highest Compensation</option>
-            <option value="effort_asc">Lowest Application Effort</option>
+            <option value="salary_desc">Highest Comp</option>
+            <option value="effort_asc">Lowest Effort</option>
           </select>
         </div>
 
-        {/* Verdict Pills */}
-        <div className="filter-pills-row">
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginRight: '2px' }}>Verdict:</span>
-          
-          {(['all', 'apply', 'strong_match', 'review', 'low_priority', 'skip'] as const).map(v => (
-            <button
-              key={v}
-              className={`filter-pill ${filters.verdict === v ? 'active' : ''}`}
-              onClick={() => setFilters(prev => ({ ...prev, verdict: v }))}
-            >
-              {v === 'all' ? 'All Roles' : v.replace('_', ' ')}
-            </button>
-          ))}
-
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginLeft: '6px', marginRight: '2px' }}>Location:</span>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
           <select
-            className="select-filter"
+            className="filter-select"
+            value={filters.verdict}
+            onChange={(e) => setFilters(prev => ({ ...prev, verdict: e.target.value as FilterState['verdict'] }))}
+          >
+            <option value="all">All Verdicts</option>
+            <option value="apply">Apply</option>
+            <option value="strong_match">Strong Match</option>
+            <option value="review">Review</option>
+            <option value="low_priority">Low Priority</option>
+            <option value="skip">Skip</option>
+          </select>
+          <select
+            className="filter-select"
             value={filters.workArrangement}
             onChange={(e) => setFilters(prev => ({ ...prev, workArrangement: e.target.value as FilterState['workArrangement'] }))}
           >
             <option value="all">All Locations</option>
-            <option value="latam">LATAM / Venezuela</option>
+            <option value="latam">LATAM / VZLA</option>
             <option value="remote">All Remote</option>
             <option value="hybrid">Hybrid</option>
           </select>
-
           <select
-            className="select-filter"
+            className="filter-select"
             value={filters.effort}
             onChange={(e) => setFilters(prev => ({ ...prev, effort: e.target.value as FilterState['effort'] }))}
           >
@@ -115,21 +102,16 @@ export const JobList: React.FC<JobListProps> = ({
         </div>
       </div>
 
-      {/* List count summary */}
-      <div style={{ padding: '6px 14px', background: 'var(--bg-app)', borderBottom: '1px solid var(--border-subtle)', fontSize: '11.5px', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between' }}>
-        <span>Showing <strong>{jobs.length}</strong> of {totalCount} opportunities</span>
-        <span style={{ fontSize: '10.5px' }}>Tip: Use ↑ ↓ or J / K keys to navigate</span>
+      <div style={{ padding: '8px 16px', background: 'var(--bg-base)', borderBottom: '1px solid var(--border-subtle)', fontSize: '11px', color: 'var(--text-tertiary)', display: 'flex', justifyContent: 'space-between' }}>
+        <span>Showing {jobs.length} / {totalCount} opportunities</span>
+        <span>Use ↑ ↓ or J / K to navigate</span>
       </div>
 
-      {/* Jobs Scroll list */}
-      <div className="job-list-scroll">
+      <div style={{ flex: 1, overflowY: 'auto' }}>
         {jobs.length === 0 ? (
           <div className="empty-state-box">
-            <Inbox size={32} />
-            <div className="empty-state-title">No matching opportunities</div>
-            <div className="empty-state-desc">
-              Try adjusting your search keywords or broadening verdict and effort filters.
-            </div>
+            <div style={{ fontSize: '14px', marginBottom: '4px' }}>No matches found</div>
+            <div style={{ fontSize: '12px' }}>Adjust filters to see more opportunities.</div>
           </div>
         ) : (
           jobs.map(job => (

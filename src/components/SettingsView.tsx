@@ -1,5 +1,4 @@
 import React from 'react';
-import { User, Sliders, Shield, RotateCcw } from 'lucide-react';
 
 interface SettingsViewProps {
   onResetData: () => void;
@@ -7,114 +6,51 @@ interface SettingsViewProps {
 
 export const SettingsView: React.FC<SettingsViewProps> = ({ onResetData }) => {
   return (
-    <div className="view-container">
-      <div className="view-header">
-        <div>
-          <h2 className="view-title">Personal Preferences & Decision Model</h2>
-          <div className="view-subtitle">Inspect Robert’s active candidate profile, scoring weights, and hard filter boundaries.</div>
-        </div>
+    <div className="generic-view-container">
+      <div className="detail-top-header" style={{ marginBottom: '16px' }}>
+        <h2 className="detail-title">Centro de control de decisiones</h2>
+        <div className="detail-subtitle">Inspecciona el perfil activo de Robert, los pesos de puntuación y los filtros estrictos.</div>
       </div>
 
-      {/* Profile summary */}
-      <div className="settings-section-card">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <User size={18} color="var(--color-apply)" />
-          <h3 className="settings-heading">Candidate Profile (Source of Truth)</h3>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', fontSize: '12.5px' }}>
-          <div>
-            <strong>Name:</strong> Robert Betancourt
-          </div>
-          <div>
-            <strong>Experience:</strong> ~5 Years in Product Design / UI/UX
-          </div>
-          <div>
-            <strong>Base Location:</strong> Venezuela (Remote / LATAM timezone overlap)
-          </div>
-          <div>
-            <strong>Target Compensation:</strong> $2,000–$2,500+ USD/mo (No rigid salary floor for healthy conditions)
-          </div>
-          <div>
-            <strong>Key Domains:</strong> Fintech, Neobanks, Crypto Wallets, B2B SaaS, Logistics
-          </div>
-          <div>
-            <strong>Featured Portfolio:</strong> B89, Banexcoin, GIP, Autoandes, BE FIT, Mimik
+      <div className="settings-grid">
+        <div className="ui-card">
+          <div className="ui-card-header">Perfil de candidato</div>
+          <div className="eval-table">
+            <div className="eval-row"><span className="eval-key">Nombre</span><span className="eval-val">Robert Betancourt</span></div>
+            <div className="eval-row"><span className="eval-key">Rol / Experiencia</span><span className="eval-val">Product Designer (~5 Yrs)</span></div>
+            <div className="eval-row"><span className="eval-key">Base de ubicación</span><span className="eval-val">Venezuela (LATAM)</span></div>
+            <div className="eval-row"><span className="eval-key">Salario objetivo</span><span className="eval-val">$2,000–$2,500+ /mo</span></div>
           </div>
         </div>
-      </div>
 
-      {/* AI Scoring Weights */}
-      <div className="settings-section-card">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Sliders size={18} color="#38bdf8" />
-          <h3 className="settings-heading">AI Evaluation Dimension Breakdown (Phase 1 Baseline)</h3>
+        <div className="ui-card">
+          <div className="ui-card-header">Pesos de dimensiones de IA (100 Puntos)</div>
+          <div className="eval-table">
+            <div className="eval-row"><span className="eval-key">Coincidencia de rol y dominio</span><span className="eval-val">25</span></div>
+            <div className="eval-row"><span className="eval-key">Compensación y condiciones</span><span className="eval-val">25</span></div>
+            <div className="eval-row"><span className="eval-key">Ubicación y elegibilidad</span><span className="eval-val">15</span></div>
+            <div className="eval-row"><span className="eval-key">Coincidencia de experiencia</span><span className="eval-val">10</span></div>
+            <div className="eval-row"><span className="eval-key">Calidad del alcance</span><span className="eval-val">10</span></div>
+            <div className="eval-row"><span className="eval-key">Calidad de la empresa</span><span className="eval-val">10</span></div>
+            <div className="eval-row"><span className="eval-key">Esfuerzo de aplicación</span><span className="eval-val">5</span></div>
+          </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', fontSize: '12px' }}>
-          <div style={{ background: 'var(--bg-panel-subtle)', padding: '10px', borderRadius: 'var(--radius-xs)' }}>
-            <div style={{ fontWeight: 700 }}>Role & Domain Fit (25%)</div>
-            <div style={{ color: 'var(--text-muted)' }}>Product design, UX/UI, fintech/SaaS overlap</div>
-          </div>
-          <div style={{ background: 'var(--bg-panel-subtle)', padding: '10px', borderRadius: 'var(--radius-xs)' }}>
-            <div style={{ fontWeight: 700 }}>Comp & Conditions (25%)</div>
-            <div style={{ color: 'var(--text-muted)' }}>Salary normalized relative to 40h/wk bounds</div>
-          </div>
-          <div style={{ background: 'var(--bg-panel-subtle)', padding: '10px', borderRadius: 'var(--radius-xs)' }}>
-            <div style={{ fontWeight: 700 }}>Location & Eligibility (15%)</div>
-            <div style={{ color: 'var(--text-muted)' }}>LATAM contractor compatibility</div>
-          </div>
-          <div style={{ background: 'var(--bg-panel-subtle)', padding: '10px', borderRadius: 'var(--radius-xs)' }}>
-            <div style={{ fontWeight: 700 }}>Experience Match (10%)</div>
-            <div style={{ color: 'var(--text-muted)' }}>Alignment with ~5 years experience</div>
-          </div>
-          <div style={{ background: 'var(--bg-panel-subtle)', padding: '10px', borderRadius: 'var(--radius-xs)' }}>
-            <div style={{ fontWeight: 700 }}>Scope Quality (10%)</div>
-            <div style={{ color: 'var(--text-muted)' }}>Ownership vs. multi-hat scope creep</div>
-          </div>
-          <div style={{ background: 'var(--bg-panel-subtle)', padding: '10px', borderRadius: 'var(--radius-xs)' }}>
-            <div style={{ fontWeight: 700 }}>Application Effort (5%)</div>
-            <div style={{ color: 'var(--text-muted)' }}>Friction & take-home penalty</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Hard Filter Rules */}
-      <div className="settings-section-card">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Shield size={18} color="var(--color-skip)" />
-          <h3 className="settings-heading">Active Hard Filter Rules (JOB_RULES.md)</h3>
+        <div className="ui-card" style={{ borderColor: 'var(--color-danger)', background: 'var(--color-danger-bg)' }}>
+          <div className="ui-card-header" style={{ color: 'var(--color-danger)', borderBottomColor: 'rgba(239, 68, 68, 0.3)' }}>Descalificadores estrictos</div>
+          <ul className="signal-list hard-fail">
+            <li>Posiciones no remuneradas, $0, o solo con acciones</li>
+            <li>Restricciones W-2 / Residencia exclusiva en EE. UU.</li>
+            <li>Horas extremas (12+ horas, fines de semana constantes)</li>
+          </ul>
         </div>
 
-        <ul style={{ paddingLeft: '20px', fontSize: '12.5px', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <li><strong>Reject Unpaid Positions:</strong> $0 / Equity-only opportunities are automatically flagged as incompatible.</li>
-          <li><strong>US-Only Work Authorization:</strong> Incompatible W-2 or residency restrictions are flagged immediately.</li>
-          <li><strong>Extreme Hours & Burnout:</strong> Mandatory 12+ hour days, weekends, or 24/7 on-call expectations trigger red flags.</li>
-          <li><strong>Multi-Source Normalization:</strong> Multiple appearances of the same opportunity are grouped to prevent clutter.</li>
-        </ul>
-      </div>
-
-      {/* Reset Mock Data */}
-      <div className="settings-section-card" style={{ border: '1px solid var(--border-medium)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <h3 className="settings-heading">Prototype State Reset</h3>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-              Reset all job decisions, applied trackers, and saved lists back to default mock state.
-            </div>
+        <div className="ui-card">
+          <div className="ui-card-header">Operaciones del sistema</div>
+          <p className="prose" style={{ fontSize: '13px' }}>Restablece todos los datos de prueba, trabajos guardados, estados de aplicación y evaluaciones omitidas a su estado inicial.</p>
+          <div style={{ marginTop: 'auto', paddingTop: '16px' }}>
+            <button className="btn-action-quiet active-skip" onClick={() => { if (window.confirm('Reset all mock data?')) onResetData(); }}>Restablecer datos de fábrica</button>
           </div>
-
-          <button
-            className="btn-action"
-            onClick={() => {
-              if (window.confirm('Reset all mock data to initial baseline?')) {
-                onResetData();
-              }
-            }}
-          >
-            <RotateCcw size={13} />
-            <span>Reset Mock Data</span>
-          </button>
         </div>
       </div>
     </div>
