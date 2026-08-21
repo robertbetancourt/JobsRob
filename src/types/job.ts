@@ -1,5 +1,5 @@
-export type WorkArrangement = 'remote' | 'hybrid' | 'onsite';
-export type EmploymentType = 'full_time' | 'contract' | 'freelance' | 'part_time';
+export type WorkArrangement = 'remote' | 'hybrid' | 'onsite' | 'unknown';
+export type EmploymentType = 'full_time' | 'contract' | 'freelance' | 'part_time' | 'unknown';
 export type JobStatus = 'new' | 'saved' | 'skipped' | 'applied';
 export type Verdict = 'apply' | 'review' | 'skip' | 'save';
 export type ConfidenceLevel = 'high' | 'medium' | 'low' | 'unknown';
@@ -12,16 +12,16 @@ export interface Location {
   city: string | null;
   work_arrangement: WorkArrangement;
   timezone_requirements: string[];
-  residency_required: boolean;
-  work_authorization_required: boolean;
-  relocation_available: boolean;
+  residency_required: boolean | null;
+  work_authorization_required: boolean | null;
+  relocation_available: boolean | null;
 }
 
 export interface Salary {
   min: number | null;
   max: number | null;
   currency: string;
-  period: 'year' | 'month' | 'hour';
+  period: 'year' | 'month' | 'hour' | 'unknown';
   raw: string;
   source: 'range_disclosed' | 'inferred' | 'external_estimate' | 'unknown';
   confidence: ConfidenceLevel;
@@ -33,13 +33,13 @@ export interface WorkingHours {
   schedule: string | null;
   timezone: string | null;
   weekend_required: 'no' | 'occasional_compensated' | 'frequent_uncompensated' | 'unknown';
-  after_hours_expected: boolean;
-  on_call: boolean;
+  after_hours_expected: boolean | null;
+  on_call: boolean | null;
   notes: string | null;
 }
 
 export interface TakeHomeAssignment {
-  required: boolean;
+  required: boolean | null;
   estimated_hours?: number | null;
   description?: string;
   compensated: boolean | 'unknown';
@@ -50,12 +50,12 @@ export interface ApplicationRequirements {
   ats: string;
   estimated_effort: 'low' | 'medium' | 'high' | 'very_high' | 'unknown';
   estimated_minutes: number | null;
-  cover_letter_required: boolean;
-  portfolio_required: boolean;
-  references_required: boolean;
+  cover_letter_required: boolean | null;
+  portfolio_required: boolean | null;
+  references_required: boolean | null;
   questions_count: number;
   take_home: TakeHomeAssignment;
-  video_required: boolean;
+  video_required: boolean | null;
 }
 
 export type HardFilterReason = 
@@ -136,7 +136,7 @@ export interface Job {
   experience_required: string;
   requirements: {
     years_experience: { min: number | null; max: number | null };
-    degree_required: boolean;
+    degree_required: boolean | null;
     skills: string[];
     languages: string[];
     work_authorization: string[];
@@ -154,6 +154,7 @@ export interface Job {
   discovered_at: string; // ISO
   last_seen_at: string; // ISO
   status: JobStatus;
+  semantic_status?: 'pending' | 'completed' | 'failed' | 'not_required';
 }
 
 export interface JobApplication {

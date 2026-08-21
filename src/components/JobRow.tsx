@@ -1,5 +1,5 @@
 import React from 'react';
-import { Job, AIVerdict } from '../types/job';
+import { Job, Verdict } from '../types/job';
 
 interface JobRowProps {
   job: Job;
@@ -7,10 +7,10 @@ interface JobRowProps {
   onSelect: () => void;
 }
 
-function getVerdictClass(verdict: AIVerdict): string {
+function getVerdictClass(verdict: Verdict): string {
   switch (verdict) {
     case 'apply':
-    case 'strong_match': return 'score-strong';
+    case 'apply': return 'score-strong';
     case 'review': return 'score-review';
     case 'skip': return 'score-skip';
     default: return 'score-low';

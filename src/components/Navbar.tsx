@@ -11,6 +11,7 @@ interface NavbarProps {
   stats: ScanStats;
   onTriggerScan: () => void;
   isScanning: boolean;
+  analyzingCount?: number;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -20,7 +21,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   appliedCount,
   companiesCount,
   onTriggerScan,
-  isScanning
+  isScanning,
+  analyzingCount = 0
 }) => {
   return (
     <header className="app-navbar">
@@ -43,6 +45,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       </nav>
 
       <div className="header-actions">
+        {analyzingCount > 0 && <span className="analyzing-badge" style={{marginRight: "15px", color: "var(--accent-primary)", fontSize: "0.85rem", display: "flex", alignItems: "center", gap: "6px"}}><span className="pulsing-dot" style={{width: 8, height: 8, backgroundColor: "var(--accent-primary)", borderRadius: "50%", animation: "pulse 1.5s infinite"}}></span> Analyzing {analyzingCount} jobs</span>}
         <button className="btn-scan" onClick={onTriggerScan} disabled={isScanning}>
           {isScanning ? 'Buscando...' : 'Buscar'}
         </button>

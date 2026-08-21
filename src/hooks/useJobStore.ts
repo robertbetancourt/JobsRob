@@ -1,3 +1,5 @@
+import { runFullPipelineScan } from '../services/pipelineService';
+import { JobRepository } from '../db/JobRepository';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   Job, 
@@ -5,9 +7,8 @@ import {
   JobApplication, 
   ScanStats, 
   HumanDecision, 
-  RejectionReason, 
   ApplicationStatus,
-  AIVerdict
+  Verdict
 } from '../types/job';
 import { MOCK_JOBS, INITIAL_SCAN_STATS } from '../data/mockJobs';
 import { MOCK_COMPANIES } from '../data/mockCompanies';
@@ -22,7 +23,7 @@ export type NavTab = 'radar' | 'saved' | 'applications' | 'companies' | 'setting
 
 export interface FilterState {
   searchQuery: string;
-  verdict: 'all' | AIVerdict;
+  verdict: 'all' | Verdict;
   workArrangement: 'all' | 'remote' | 'latam' | 'hybrid';
   effort: 'all' | 'low' | 'medium' | 'high' | 'very_high';
   status: 'all' | 'new' | 'reviewed' | 'saved' | 'skipped' | 'applied';
@@ -219,34 +220,28 @@ export function useJobStore() {
 
   // Saved Jobs
   const savedJobs = useMemo(() => {
-    return jobs.filter(j => j.status === 'saved' || j.human_review?.decision === 'save');
+    return jobs.filter(j => j.status === 'saved' );
   }, [jobs]);
 
   // Action Handlers
-  const handleDecision = useCallback((jobId: string, decision: HumanDecision, reason?: RejectionReason, notes?: string) => {
+  const handleDecision = useCallback((jobId: string, decision: HumanDecision, notes?: string) => {
     const now = new Date().toISOString();
     
     setJobs(prevJobs => prevJobs.map(job => {
       if (job.id !== jobId) return job;
 
-      let newStatus: Job['status'] = 'reviewed';
+      let newStatus: Job['status'] = 'reviewed' as any;
       if (decision === 'save') newStatus = 'saved';
       if (decision === 'skip') newStatus = 'skipped';
       if (decision === 'apply') newStatus = 'applied';
 
       return {
+    refreshJobs,
         ...job,
-        status: newStatus,
-        human_review: {
-          decision,
-          reason: reason || null,
-          notes: notes || '',
-          decided_at: now
-        }
+        status: newStatus as any
       };
     }));
 
-    // If applied or saved, create/update application tracker record
     if (decision === 'apply') {
       const targetJob = jobs.find(j => j.id === jobId);
       if (targetJob) {
@@ -260,21 +255,10 @@ export function useJobStore() {
             job_id: targetJob.id,
             job_title: targetJob.title,
             company_name: targetJob.company_name,
-            location: targetJob.location.raw,
-            salary_raw: targetJob.salary.raw,
             status: 'applied',
             applied_at: now,
-            next_action: 'Check response status / email confirmation',
-            next_action_date: new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0],
-            application_url: targetJob.application_url,
-            notes: notes || 'Applied via ' + targetJob.application_requirements.ats,
-            history: [
-              {
-                status: 'applied',
-                timestamp: now,
-                note: 'Applied from Job Radar detail view'
-              }
-            ]
+            last_updated_at: now,
+            notes: notes || 'Applied via ' + targetJob.application_requirements.ats
           };
           return [newApp, ...prev];
         });
@@ -282,22 +266,14 @@ export function useJobStore() {
     }
   }, [jobs]);
 
-  // Update application status in Applications Tracker
-  const handleUpdateApplicationStatus = useCallback((appId: string, newStatus: ApplicationStatus, note?: string) => {
-    const now = new Date().toISOString();
+  const handleUpdateApplicationStatus = useCallback((appId: string, newStatus: ApplicationStatus) => {
     setApplications(prev => prev.map(app => {
       if (app.id !== appId) return app;
       return {
+    refreshJobs,
         ...app,
         status: newStatus,
-        history: [
-          ...app.history,
-          {
-            status: newStatus,
-            timestamp: now,
-            note: note || `Status changed to ${newStatus}`
-          }
-        ]
+        
       };
     }));
   }, []);
@@ -307,6 +283,7 @@ export function useJobStore() {
     setApplications(prev => prev.map(app => {
       if (app.id !== appId) return app;
       return {
+    refreshJobs,
         ...app,
         notes,
         next_action: nextAction,
@@ -323,38 +300,37 @@ export function useJobStore() {
     }));
   }, []);
 
-  // Trigger simulated Scan
-  const triggerScan = useCallback(() => {
+  // Trigger Real Scan
+  const refreshJobs = useCallback(async () => {
+    const loadedJobs = await JobRepository.getAll();
+    setJobs(loadedJobs);
+  }, []);
+  const triggerScan = useCallback(async () => {
+    if (isScanning) return;
     setIsScanning(true);
-    setScanStep(1); // 1: Searching sources
-
-    setTimeout(() => {
-      setScanStep(2); // 2: Deduplication & Hard filters
-    }, 900);
-
-    setTimeout(() => {
-      setScanStep(3); // 3: AI scoring
-    }, 1800);
-
-    setTimeout(() => {
-      setScanStep(4); // 4: Finalizing & Completed
-      setStats({
-        total_found: 83,
-        duplicates_removed: 21,
-        incompatible_removed: 17,
-        evaluated: 45,
-        strong_matches: 8,
-        worth_reviewing: 12,
-        low_priority: 25,
-        last_scan_at: new Date().toISOString()
-      });
-    }, 2800);
-
-    setTimeout(() => {
+    setScanStep(1); // Searching sources
+    
+    try {
+      await new Promise(r => setTimeout(r, 500));
+      setScanStep(2); // Deduplication
+      
+      const stats = await runFullPipelineScan();
+      
+      setScanStep(3); // AI scoring
+      await new Promise(r => setTimeout(r, 500));
+      
+      setScanStep(4); // Finalizing
+      setStats(stats);
+      refreshJobs();
+      
+      await new Promise(r => setTimeout(r, 1000));
+    } catch (err) {
+      console.error('Scan failed:', err);
+    } finally {
       setIsScanning(false);
       setScanStep(0);
-    }, 3800);
-  }, []);
+    }
+  }, [isScanning, refreshJobs]);
 
   // Reset to initial mock state
   const resetToDefaultMockData = useCallback(() => {
@@ -370,6 +346,7 @@ export function useJobStore() {
   }, []);
 
   return {
+    refreshJobs,
     activeTab,
     setActiveTab,
     jobs,

@@ -103,6 +103,17 @@ export const JobDetail: React.FC<JobDetailProps> = ({ job, onDecision }) => {
           </div>
         )}
 
+        {job.conflicts && job.conflicts.length > 0 && (
+          <div className="ui-card" style={{ borderColor: 'var(--color-warning)', background: 'var(--color-warning-bg)' }}>
+            <div className="ui-card-header" style={{ color: 'var(--color-warning)', borderBottomColor: 'rgba(234, 179, 8, 0.3)' }}>Conflictos de Datos Detectados</div>
+            <ul className="signal-list warnings">
+              {job.conflicts.map((c, i) => (
+                <li key={i}><strong>{c.field}:</strong> {c.description}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Local Navigation Tabs */}
         <div className="local-tabs">
           <button className={`local-tab ${activeTab === 'analysis' ? 'active' : ''}`} onClick={() => setActiveTab('analysis')}>Análisis de decisión</button>
@@ -164,7 +175,13 @@ export const JobDetail: React.FC<JobDetailProps> = ({ job, onDecision }) => {
      </div>
      <div style={{fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: '1.4'}}>{ai_evaluation.dimensions.scope?.rationale}</div>
    </div>
-                  <div className="eval-row"><span className="eval-key">Calidad de la empresa</span><span className="eval-val">{ai_evaluation.dimensions.company_opportunity_quality ?? 0} / 10</span></div>
+                  <div className="eval-item-container" style={{marginBottom: '12px'}}>
+     <div className="eval-row" style={{borderBottom: 'none', paddingBottom: '0'}}>
+       <span className="eval-key">Calidad de la empresa</span>
+       <span className="eval-val">{ai_evaluation.dimensions.company?.score ?? '—'} / 10</span>
+     </div>
+     <div style={{fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: '1.4'}}>{ai_evaluation.dimensions.company?.rationale}</div>
+   </div>
                   <div className="eval-item-container" style={{marginBottom: '12px'}}>
      <div className="eval-row" style={{borderBottom: 'none', paddingBottom: '0'}}>
        <span className="eval-key">Esfuerzo de aplicación</span>
@@ -221,8 +238,8 @@ export const JobDetail: React.FC<JobDetailProps> = ({ job, onDecision }) => {
             
             <div className="ui-card">
                <div className="ui-card-header">Evaluación de compensación y horas</div>
-               <p className="text-block" style={{ marginBottom: '12px' }}><strong>Lógica de compensación:</strong> {ai_evaluation.compensation_assessment}</p>
-               <p className="text-block" style={{ marginBottom: '12px' }}><strong>Lógica de ubicación:</strong> {ai_evaluation.location_assessment}</p>
+               
+               
                {working_hours && (
                  <p className="text-block">
                    <strong>Horas de trabajo:</strong> {working_hours.hours_per_week || '40'} hrs/sem. 

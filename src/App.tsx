@@ -1,4 +1,5 @@
 import { useJobStore } from './hooks/useJobStore';
+import { useSemanticAnalyzer } from './hooks/useSemanticAnalyzer';
 import { Navbar } from './components/Navbar';
 import { RadarView } from './components/RadarView';
 import { SavedView } from './components/SavedView';
@@ -29,12 +30,17 @@ export function App() {
     handleUpdateApplicationStatus,
     handleUpdateApplicationDetails,
     handleToggleCompanySaved,
-    resetToDefaultMockData
+    resetToDefaultMockData,
+    // @ts-ignore
+    refreshJobs
   } = useJobStore();
+
+  const { analyzingCount } = useSemanticAnalyzer(refreshJobs);
 
   return (
     <div className="app-container">
       <Navbar
+        analyzingCount={analyzingCount}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         savedCount={savedJobs.length}

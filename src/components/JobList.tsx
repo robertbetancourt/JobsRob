@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Search, Inbox } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Job } from '../types/job';
 import { FilterState } from '../hooks/useJobStore';
 import { JobRow } from './JobRow';

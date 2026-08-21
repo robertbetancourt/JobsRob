@@ -90,7 +90,7 @@ export const ScanModal: React.FC<ScanModalProps> = ({
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
                 <span><strong>{stats.strong_matches}</strong> strong matches</span>
                 <span><strong>{stats.worth_reviewing}</strong> worth reviewing</span>
-                <span style={{ color: 'var(--text-muted)' }}>{stats.low_priority} low priority</span>
+                <span style={{ color: 'var(--text-muted)' }}>{stats.skipped_automatically} skipped automatically</span>
               </div>
             </div>
           )}

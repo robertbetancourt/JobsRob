@@ -15,8 +15,8 @@ The canonical representation of an opportunity.
 | `company_industry` | `string` | Industry/Domain of the company. |
 | `description` | `string` | Full raw text description. |
 | `location` | `LocationObj` | Structured location and work arrangement data. |
-| `work_arrangement` | `enum` | `'remote' \| 'hybrid' \| 'onsite'` |
-| `employment_type` | `enum` | `'full_time' \| 'contract' \| 'freelance' \| 'part_time'` |
+| `work_arrangement` | `enum` | `'remote' \| 'hybrid' \| 'onsite' \| 'unknown'` |
+| `employment_type` | `enum` | `'full_time' \| 'contract' \| 'freelance' \| 'part_time' \| 'unknown'` |
 | `seniority` | `string` | e.g. `'senior'`, `'lead'`, `'staff'` |
 | `salary` | `SalaryObj` | Structured compensation data. |
 | `working_hours` | `WorkingHoursObj` | Assessment of schedule and demands. |
@@ -89,3 +89,24 @@ Instead of raw numbers, every dimension provides a rationale for transparent exp
 - `salary` now tracks `confidence` to distinguish between explicitly stated ranges vs inferred market rates.
 - `working_hours` uses enums for `weekend_required` (no, occasional_compensated, frequent_uncompensated) to prevent false-positive rejections.
 - `conflicts` explicitly tracks contradictory evidence across multiple sources.
+
+## 6. Unknown Semantics & Inference
+
+To comply with the rule **"Never invent missing job information"**, the canonical model strictly distinguishes between negative evidence and missing evidence.
+
+**Boolean Semantics:**
+- `true` = The source explicitly requires this.
+- `false` = The source explicitly states this is NOT required.
+- `null` / `unknown` = The source did not specify.
+
+**UNKNOWN ≠ FALSE**
+**UNKNOWN ≠ NEGATIVE EVIDENCE**
+
+### Allowed Inference Rules
+- **Work Arrangement:** If the text says "Remote anywhere in Latin America" or "Fully Distributed", `work_arrangement = remote` is inferred.
+- **Employment Type:** If the title says "Freelance Product Designer", `employment_type = freelance` is inferred.
+
+### Prohibited Inferences
+- **Location Name ≠ Onsite:** "New York, NY" → MUST remain `unknown` unless the job explicitly says "in-office" or "onsite".
+- **Omission ≠ Full Time:** Missing employment type → MUST remain `unknown`, never default to `full_time`.
+- **Omission ≠ False:** Missing degree requirement → MUST remain `null`, never default to `false`.
